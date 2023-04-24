@@ -1,48 +1,57 @@
 const apiKey = "3da186cea02cf61bf87b0a2d58d7736d";
 
-// DOM elements
 const cityInput = document.getElementById("city-input");
 const searchBtn = document.getElementById("click-btn");
-const weatherList = document.querySelectorAll(".list-group");//lista da temp semana
-const dateElement = document.querySelector("#date span")
+const cityElement = document.getElementById("city-name");
 const weatherIconElement = document.querySelector("#weather-icon");//new
 const tempElement = document.querySelector("#temp span");//new
 const windElement = document.querySelector("#wind span");//new
-const humidityElement = document.querySelector("#humidity span")
+const humidityElement = document.querySelector("#humidity span");
+const dateElement = document.querySelector("#date span");
 
+// local storage
+let lastSearchedCity = localStorage.getItem('lastSearchedCity') || '';
 
-//function
-const getWeatherData =  async (city) => {
-  const apiURL = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`
-  const res = await fetch(apiURL) 
-  const data = await res.json()
-  console.log(data);
+// get weather function data for a given city
+const getWeatherData = async (city) => {
+  const apiURL = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
+  const res = await fetch(apiURL);
+  const data = await res.json();
+  console.log(data)
 };
 
+// displayfunction weather data on the page
 const showWeatherData = async (city) => {
-  const data =  await getWeatherData(city);
+  const data = await getWeatherData(city);
 
   cityElement.innerText = data.name;
   tempElement.innerText = parseInt(data.main.temp);
-  // descElement.innerText = data.weather[0].description;
   weatherIconElement.setAttribute("src", `https://openweathermap.org/img/wn/${data.weather[0].icon}.png`);
-  cityElement.setAttribute(apiCityURL + data.sys.city);
   windElement.innerText = `${data.wind.speed}mph`;
   humidityElement.innerText = `${data.main.humidity}%`; 
+  dateElement.innerText = new Date().toDateString();
+
+  localStorage.setItem('lastSearchedCity', city);
 };
 
-//event
+// search button
 searchBtn.addEventListener("click", async (e) => {
-  e.preventDefault();
+  e.preventDefault()
 
-  const city = cityInput.value;
+  const city = cityInput.value
 
-  getWeatherData(city)
+  await showWeatherData(city)
 });
 
-cityInput.addEventListener("keyup", (e) =>{
+// city input
+cityInput.addEventListener("keyup", async (e) => {
   if (e.code === "Enter") {
-    const city = e.target.value;
-    showWeatherData(city);
+    const city = e.target.value
+
+    await showWeatherData(city)
   }
 });
+
+if (lastSearchedCity) {
+  showWeatherData(lastSearchedCity)
+};
